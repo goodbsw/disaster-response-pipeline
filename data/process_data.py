@@ -1,17 +1,62 @@
 import sys
+import pandas as pd
+
+from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
-    pass
-
+    """ Load data from the file paths
+    
+    Args:
+        messages_filepath(string): the path where disaster_messages.csv is loacated
+        categories_filepath(string): the path where disaster_categories.csv is located
+        
+    Returns:
+        df(DataFrame): merged dataframe from two sources    
+    """
+    messages = pd.read_csv(messages_filepath)
+    categories = pd.read_csv(categories_filepath)
+    
+    df = pd.merge(messages, categories, on='id')
+    return df
 
 def clean_data(df):
-    pass
+    """ Return the cleaned dataframe
+    
+    Args:
+        df(Dataframe): dataframe returned from the load_data function
+        
+    Returns:
+        df(Dataframe): cleaned dataframe
+    """
+    
+    # create a dataframe of the 36 individual category columns
+    categories = df['categories'].str.split(';', expand=True)
 
+    # select the first row of the categories dataframe for column names
+    row = categories.iloc[0]
+    category_colnames = categories.iloc[0].apply(lambda x: x[:-2]).tolist()
+    categories.columns = category_colnames
+    
+    # convert category values to just numbers 0 or 1
+    for column in categories:
+        categories[column] = categories[column].str[-1:]
+        categories[column] = categories[column].astype('int64')
 
-def save_data(df, database_filename):
-    pass  
-
+    # replace categories column in df with new category column
+    df.drop('categories', axis=1, inplace=True)
+    df = pd.concat([df, categories], axis=1)
+    
+    # remove duplicates
+    df.drop_duplicates(subset=['message'], inplace=True)
+    
+    return df
+    
+def save_data(df, database_filepath):
+    """Save the cleaned data to database"""
+    
+    engine = create_engine('sqlite:///{}'.format(database_filepath))
+    df.to_sql('DisasterResponse', engine, index=False)
 
 def main():
     if len(sys.argv) == 4:
