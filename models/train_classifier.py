@@ -7,8 +7,8 @@ from nltk.tokenize import word_tokenize
 def load_data(database_filepath):
     engine = create_engine('sqlite:///{}'.format(database_filepath))
     df = pd.read_sql_table(con=engine, table_name='DisasterResponse')
-    X = df['message']
-    Y = df.loc[:, 'related':'direct_report']
+    X = df['message'].values
+    Y = df.loc[:, 'related':'direct_report'].values
     
     return X, Y
 
@@ -25,8 +25,13 @@ def tokenize(text):
     return clean_tokens
 
 def build_model():
-    pass
+    pipeline = Pipeline([
+        ('vect', CountVectorizer(tokenizer=tokenize)),
+        ('tfidf', TfidfTransformer()),
+        ('clf', MultiOutputClassifier(estimator=DecisionTreeClassifier()))
+    ])
 
+    return pipeline
 
 def evaluate_model(model, X_test, Y_test, category_names):
     pass
