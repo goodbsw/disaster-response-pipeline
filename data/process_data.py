@@ -50,6 +50,9 @@ def clean_data(df):
     # remove duplicates
     df.drop_duplicates(subset=['message'], inplace=True)
     
+    # replace 2 value with 1 in related column
+    df.related.replace(2, 1, inplace=True)
+    
     return df
     
 def save_data(df, database_filepath):
