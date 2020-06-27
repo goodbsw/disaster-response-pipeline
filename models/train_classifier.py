@@ -3,6 +3,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 from nltk import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
+from sklearn.model_selection import train_test_split, GridSearchCV
 
 def load_data(database_filepath):
     engine = create_engine('sqlite:///{}'.format(database_filepath))
@@ -30,8 +31,17 @@ def build_model():
         ('tfidf', TfidfTransformer()),
         ('clf', MultiOutputClassifier(estimator=DecisionTreeClassifier()))
     ])
+    
+    params = {
+        'clf__estimator__n_estimators': [100, 200],
+        'clf__estimator__max_features': ['auto', 'log2'],
+        'clf__estimator__min_samples_leaf': [1, 8],
+        'clf__estimator__n_jobs': [-1]
+    }
 
-    return pipeline
+    cv = GridSearchCV(estimator=pipeline, param_grid=params, cv=3, n_jobs=-1)
+    
+    return cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
     pass
