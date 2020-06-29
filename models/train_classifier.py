@@ -19,7 +19,13 @@ def load_data(database_filepath):
     
     Args:
         database_filepath(string): database filepath input in the interpreter
+        
+    Returns:
+        X(numpy.ndarray): values of message column
+        Y(numpy.ndarray): values of 36 target columns
+        category_names(pandas.core.indexes.base.Index): columns' name of 36 target columns
     """
+    
     engine = create_engine('sqlite:///{}'.format(database_filepath))
     df = pd.read_sql_table(con=engine, table_name='DisasterResponse')
     X = df['message'].values
@@ -30,6 +36,10 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    """
+    Function to return tokenized text in order to build model
+    """
+    
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
     
@@ -41,6 +51,15 @@ def tokenize(text):
     return clean_tokens
 
 def build_model():
+    """
+    Builds a pipeline to build a classification model
+    The pipeline consists of:
+        1. CountVectorizer
+        2. TfidTransformer
+        3. MultioutputClassifier
+        4. RandomForestClassifier
+    """
+    
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -56,11 +75,15 @@ def build_model():
     #     'clf__estimator__n_jobs': [-1]
     # }
 
-    # cv = GridSearchCV(estimator=pipeline, param_grid=params, cv=3, n_jobs=-1)
+    pipeline = GridSearchCV(estimator=pipeline, param_grid=params, cv=3, n_jobs=-1)
     
-    return pipeline
+    return cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    Evaluate model with the test data and predict data based on Precision, Recall, and F1-Score feature
+    """
+    
     df_y_test = pd.DataFrame(data=Y_test, columns=category_names)
     
     y_pred = model.predict(X_test)
@@ -70,6 +93,10 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    """
+    Save model as pkl file to apply to Webapp
+    """
+    
     with open(model_filepath, 'wb') as model_file:
         pickle.dump(model,model_file)
 
