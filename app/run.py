@@ -9,6 +9,7 @@ from nltk.tokenize import word_tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
+from plotly.graph_objs import Pie
 from sqlalchemy import create_engine
 
 app = Flask(__name__)
@@ -36,15 +37,17 @@ model = joblib.load("../models/classifier.pkl")
 @app.route('/')
 @app.route('/index')
 def index():
-    
-    # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
+    # Variables of visualization 1
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
     
+    # variables of visualization 2
+    cat_sum = df.iloc[:, 4:].sum().tolist()
+    cat_names = df.iloc[:, 4:].sum().index.tolist()
+    
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
     graphs = [
+        # visualization 1: frequency of Genres
         {
             'data': [
                 Bar(
@@ -61,6 +64,22 @@ def index():
                 'xaxis': {
                     'title': "Genre"
                 }
+            }
+        },
+        # visualization 2: frequency of 36 categories
+        {
+            'data': [
+                Pie(
+                    labels=cat_names,
+                    values=cat_sum
+                )
+            ],
+            
+            'layout': {
+                'title': 'Ratios of Message Categories',
+                'autosize': False,
+                'height': 650,
+                'width': 1000
             }
         }
     ]
@@ -89,7 +108,6 @@ def go():
         query=query,
         classification_result=classification_results
     )
-
 
 def main():
     app.run(host='0.0.0.0', port=3001, debug=True)

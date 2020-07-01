@@ -60,6 +60,8 @@ def build_model():
         4. RandomForestClassifier
     """
     
+    # Since the training takes too long for GridSearchCv,
+    # best params are applied after cv.best_params_
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -75,9 +77,9 @@ def build_model():
     #     'clf__estimator__n_jobs': [-1]
     # }
 
-    pipeline = GridSearchCV(estimator=pipeline, param_grid=params, cv=3, n_jobs=-1)
+    # cv = GridSearchCV(estimator=pipeline, param_grid=params, cv=3, n_jobs=-1)
     
-    return cv
+    return pipeline
 
 def evaluate_model(model, X_test, Y_test, category_names):
     """
