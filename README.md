@@ -1,5 +1,5 @@
 # Disaster Response Pipeline
----
+
 ## Introduction
 This project is for categorizing 36 disaster classes(e.g. flood, strom, shelter, ...) based on the messages delivered during disasters. The training set of data is provided by [Figure Eight](https://appen.com/) to build a model for an API that classifies disaster messages. The project has been developed as part of Udacity Nano degree for data scientist.
 
