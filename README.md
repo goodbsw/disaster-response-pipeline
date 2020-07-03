@@ -29,3 +29,13 @@ app:
   
 ```python app/run.py``` 
   - Run web application
+
+## Webapp description
+1. Three types of messages' genres
+![bar chart](images/bar.png)
+
+2. The distribution of message categories
+![pie chart](images/pie.png)
+
+3. The result of message search
+![screenshot](images/search_result.png)
