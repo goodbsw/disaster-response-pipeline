@@ -60,26 +60,21 @@ def build_model():
         4. RandomForestClassifier
     """
     
-    # Since the training takes too long for GridSearchCv,
-    # best params are applied after cv.best_params_
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
-        ('clf', MultiOutputClassifier(estimator=RandomForestClassifier(min_samples_leaf=1,
-                                                                       n_estimators=100,
-                                                                       n_jobs=-1)))
+        ('clf', MultiOutputClassifier(estimator=RandomForestClassifier()))
     ])
     
-    # params = {
-    #     'clf__estimator__n_estimators': [100, 200],
-    #     'clf__estimator__max_features': ['auto', 'log2'],
-    #     'clf__estimator__min_samples_leaf': [1, 8],
-    #     'clf__estimator__n_jobs': [-1]
-    # }
+    params = {
+        'clf__estimator__n_estimators': [100, 200],
+        'clf__estimator__min_samples_leaf': [1, 8],
+        'clf__estimator__n_jobs': [None, -1]
+    }
 
-    # cv = GridSearchCV(estimator=pipeline, param_grid=params, cv=3, n_jobs=-1)
+    cv = GridSearchCV(estimator=pipeline, param_grid=params, cv=3, n_jobs=-1)
     
-    return pipeline
+    return cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
     """
@@ -91,8 +86,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
     y_pred = model.predict(X_test)
     df_y_pred = pd.DataFrame(data=y_pred, columns=category_names)
     
-    return classification_report(df_y_test, df_y_pred)
-
+    print(classification_report(df_y_test, df_y_pred))
 
 def save_model(model, model_filepath):
     """
